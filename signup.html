@@ -1,21 +1,16 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Task Tracker</title>
+  <title>Sign Up - Task Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <style>
-    .glass-bg {
-      background: rgba(255,255,255,0.85);
-      backdrop-filter: blur(10px);
-    }
     .animate-fade-in {
       animation: fadeIn 0.8s cubic-bezier(.4,0,.2,1);
     }
@@ -23,99 +18,177 @@
       from { opacity: 0; transform: translateY(40px);}
       to { opacity: 1; transform: translateY(0);}
     }
-    /* Optional: Custom scrollbar for better look */
-    ::-webkit-scrollbar {
-      width: 8px;
-      background: #e0e7ff;
+    .glass-bg {
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(8px);
     }
-    ::-webkit-scrollbar-thumb {
-      background: #c4b5fd;
-      border-radius: 4px;
+    @media (max-width: 640px) {
+      .signup-card {
+        padding: 1.5rem !important;
+        border-radius: 1.25rem !important;
+      }
     }
   </style>
 </head>
-<body class="bg-gradient-to-br from-blue-200 via-purple-100 to-pink-100 min-h-screen font-sans">
+<body class="bg-gradient-to-br from-blue-200 via-purple-100 to-pink-100 min-h-screen font-sans flex items-center justify-center">
 
-  <!-- Board Section -->
-  <div id="board-section" class="min-h-screen flex flex-col">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row justify-between items-center px-2 sm:px-4 md:px-8 py-4 glass-bg shadow-lg rounded-b-2xl animate-fade-in gap-2 sm:gap-0">
-      <div class="flex items-center gap-3">
-        <div class="bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-full p-2 shadow">
-          <i class="fa-solid fa-list-check text-white text-2xl"></i>
+  <div class="signup-card glass-bg shadow-2xl rounded-3xl p-8 sm:p-10 w-full max-w-md relative animate-fade-in">
+    <!-- Logo/Brand -->
+    <div class="flex flex-col items-center mb-6">
+      <div class="bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-full p-4 mb-2 shadow-lg animate-fade-in" style="animation-delay:0.1s;">
+        <i class="fa-solid fa-list-check text-white text-3xl"></i>
+      </div>
+      <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 drop-shadow">Task Tracker</h2>
+      <p class="text-gray-500 text-sm mt-1">Create your account to get started!</p>
+    </div>
+    <!-- Alert -->
+    <div id="signup-alert" class="hidden mb-4 px-4 py-2 rounded text-white text-center"></div>
+    <!-- Signup Form -->
+    <form id="register-form" class="flex flex-col gap-4 mt-2" autocomplete="off">
+      <div>
+        <label for="register-name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-purple-400">
+            <i class="fa-solid fa-user"></i>
+          </span>
+          <input type="text" id="register-name" placeholder="Your Name" required
+            class="pl-10 pr-3 py-2 w-full border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300 transition bg-white/80">
         </div>
-        <span class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 drop-shadow">Task Tracker</span>
       </div>
-      <div class="flex items-center gap-2 sm:gap-4 mt-2 sm:mt-0">
-        <span id="welcome-user" class="text-base sm:text-lg font-semibold text-blue-700"></span>
-        <button id="logout-btn" class="bg-gradient-to-r from-pink-500 to-purple-500 text-white px-3 sm:px-4 py-2 rounded-full font-semibold shadow hover:from-pink-600 hover:to-purple-600 transition text-sm sm:text-base">Logout</button>
+      <div>
+        <label for="register-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-purple-400">
+            <i class="fa-solid fa-envelope"></i>
+          </span>
+          <input type="email" id="register-email" placeholder="Email" required
+            class="pl-10 pr-3 py-2 w-full border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300 transition bg-white/80">
+        </div>
       </div>
-    </div>
-
-    <!-- Filters -->
-    <div class="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-4 items-center px-2 sm:px-4 md:px-8 py-4 glass-bg shadow-md rounded-xl mt-6 mx-1 sm:mx-2 md:mx-4 animate-fade-in">
-      <input type="text" id="search-input" placeholder="Search by title or assigned user..." class="w-full sm:flex-1 min-w-[120px] px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-400 bg-white/70 text-sm">
-      <select id="filter-status" class="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white/70 text-sm">
-        <option value="">All Statuses</option>
-        <option value="todo">To Do</option>
-        <option value="inprogress">In Progress</option>
-        <option value="done">Done</option>
-      </select>
-      <button id="add-task-btn" class="w-full sm:w-auto ml-0 sm:ml-auto bg-gradient-to-r from-pink-500 to-purple-500 text-white px-3 sm:px-4 py-2 rounded-full font-semibold shadow hover:from-pink-600 hover:to-purple-600 transition flex items-center justify-center gap-2 text-sm sm:text-base">
-        <i class="fa-solid fa-plus"></i> Add Task
+      <div>
+        <label for="register-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-purple-400">
+            <i class="fa-solid fa-lock"></i>
+          </span>
+          <input type="password" id="register-password" placeholder="Password (min 6 chars)" required
+            class="pl-10 pr-10 py-2 w-full border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300 transition bg-white/80">
+          <button type="button" id="toggle-password" tabindex="-1"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-purple-300 hover:text-pink-500 focus:outline-none">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+        </div>
+      </div>
+      <button type="submit" id="signup-btn"
+        class="bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-full py-2 font-bold shadow hover:from-pink-600 hover:to-purple-600 transition-all duration-200 flex items-center justify-center gap-2">
+        <span id="signup-btn-text">Register</span>
+        <span id="signup-spinner" class="hidden">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+        </span>
       </button>
+    </form>
+    <div class="mt-6 text-center text-gray-500">
+      Already have an account?
+      <a href="login.html" class="text-pink-600 hover:underline font-semibold">Login here!</a>
     </div>
-
-    <!-- Board Columns -->
-    <div class="flex-1 flex flex-col md:flex-row gap-4 md:gap-6 px-2 sm:px-4 md:px-8 py-4 sm:py-6 w-full animate-fade-in
-                overflow-x-auto">
-      <!-- To Do Column -->
-      <div class="flex-1 min-w-[220px] sm:min-w-[260px] glass-bg rounded-2xl shadow-2xl p-3 sm:p-4 flex flex-col mb-4 md:mb-0">
-        <h2 class="text-lg sm:text-xl font-bold text-blue-600 mb-3 sm:mb-4 flex items-center gap-2">
-          <span class="inline-block w-3 h-3 bg-blue-400 rounded-full"></span> To Do
-        </h2>
-        <div class="task-list flex-1 flex flex-col gap-3 sm:gap-4" id="todo-list"></div>
-      </div>
-      <!-- In Progress Column -->
-      <div class="flex-1 min-w-[220px] sm:min-w-[260px] glass-bg rounded-2xl shadow-2xl p-3 sm:p-4 flex flex-col mb-4 md:mb-0">
-        <h2 class="text-lg sm:text-xl font-bold text-yellow-600 mb-3 sm:mb-4 flex items-center gap-2">
-          <span class="inline-block w-3 h-3 bg-yellow-400 rounded-full"></span> In Progress
-        </h2>
-        <div class="task-list flex-1 flex flex-col gap-3 sm:gap-4" id="inprogress-list"></div>
-      </div>
-      <!-- Done Column -->
-      <div class="flex-1 min-w-[220px] sm:min-w-[260px] glass-bg rounded-2xl shadow-2xl p-3 sm:p-4 flex flex-col">
-        <h2 class="text-lg sm:text-xl font-bold text-green-600 mb-3 sm:mb-4 flex items-center gap-2">
-          <span class="inline-block w-3 h-3 bg-green-400 rounded-full"></span> Done
-        </h2>
-        <div class="task-list flex-1 flex flex-col gap-3 sm:gap-4" id="done-list"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal for Add/Edit Task -->
-  <div id="task-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
-    <div class="glass-bg rounded-2xl shadow-2xl w-full max-w-md p-6 sm:p-8 relative animate-fade-in mx-2">
-      <button class="absolute top-4 right-4 text-gray-400 hover:text-red-500 text-2xl font-bold" id="close-modal">&times;</button>
-      <h3 id="modal-title" class="text-lg sm:text-xl font-bold text-blue-700 mb-3 sm:mb-4">Add Task</h3>
-      <form id="task-form" class="flex flex-col gap-3 sm:gap-4">
-        <input type="text" id="task-title" placeholder="Title" required class="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-400 bg-white/70 text-sm">
-        <textarea id="task-desc" placeholder="Description" required class="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-400 bg-white/70 text-sm"></textarea>
-        <input type="text" id="task-assigned" placeholder="Assign to (email)" required class="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-400 bg-white/70 text-sm">
-        <input type="date" id="task-due" placeholder="Due Date" required class="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-400 bg-white/70 text-sm">
-        <button type="submit" id="save-task-btn" class="bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-full py-2 font-semibold shadow hover:from-pink-600 hover:to-purple-600 transition text-sm sm:text-base">Save Task</button>
-      </form>
-      <div id="task-form-message" class="mt-2 text-center text-red-500"></div>
-    </div>
+    <footer class="mt-6 text-xs text-gray-400 text-center">
+      &copy; 2024 Task Tracker
+    </footer>
   </div>
 
   <script src="firebase-config.js"></script>
-  <script src="app.js"></script>
   <script>
-    // Redirect to login if not authenticated
-    firebase.auth().onAuthStateChanged(function(user) {
-      if (!user) {
-        window.location.href = 'login.html';
+    // Show/hide password
+    const passwordInput = document.getElementById('register-password');
+    const togglePasswordBtn = document.getElementById('toggle-password');
+    togglePasswordBtn.addEventListener('click', () => {
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        togglePasswordBtn.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+      } else {
+        passwordInput.type = 'password';
+        togglePasswordBtn.innerHTML = '<i class="fa-solid fa-eye"></i>';
+      }
+    });
+
+    // Signup logic with enhanced validation and error handling
+    const registerForm = document.getElementById('register-form');
+    const signupAlert = document.getElementById('signup-alert');
+    const signupBtn = document.getElementById('signup-btn');
+    const signupBtnText = document.getElementById('signup-btn-text');
+    const signupSpinner = document.getElementById('signup-spinner');
+
+    function showAlert(message, type = 'error') {
+      signupAlert.textContent = message;
+      signupAlert.className = 'mb-4 px-4 py-2 rounded text-white text-center ' +
+        (type === 'success' ? 'bg-green-500' : 'bg-pink-500');
+      signupAlert.classList.remove('hidden');
+      setTimeout(() => {
+        signupAlert.classList.add('hidden');
+      }, 4000);
+    }
+
+    function validatePassword(password) {
+      return password.length >= 6;
+    }
+
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('register-name').value.trim();
+      const email = document.getElementById('register-email').value.trim();
+      const password = passwordInput.value;
+
+      signupAlert.classList.add('hidden');
+      signupBtn.disabled = true;
+      signupBtnText.classList.add('hidden');
+      signupSpinner.classList.remove('hidden');
+
+      if (!name) {
+        showAlert('Please enter your name.');
+        signupBtn.disabled = false;
+        signupBtnText.classList.remove('hidden');
+        signupSpinner.classList.add('hidden');
+        return;
+      }
+      if (!email) {
+        showAlert('Please enter your email.');
+        signupBtn.disabled = false;
+        signupBtnText.classList.remove('hidden');
+        signupSpinner.classList.add('hidden');
+        return;
+      }
+      if (!validatePassword(password)) {
+        showAlert('Password must be at least 6 characters.');
+        signupBtn.disabled = false;
+        signupBtnText.classList.remove('hidden');
+        signupSpinner.classList.add('hidden');
+        return;
+      }
+
+      try {
+        const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+        await firebase.firestore().collection('users').doc(userCredential.user.uid).set({
+          name: name,
+          email: email
+        });
+        showAlert('Registration successful! Redirecting to login...', 'success');
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 1200);
+      } catch (error) {
+        let msg = error.message;
+        if (error.code === 'auth/email-already-in-use') {
+          msg = 'This email is already registered. Please login or use another email.';
+        } else if (error.code === 'auth/invalid-email') {
+          msg = 'Invalid email address.';
+        } else if (error.code === 'auth/weak-password') {
+          msg = 'Password is too weak. Please use at least 6 characters.';
+        }
+        showAlert(msg);
+      } finally {
+        signupBtn.disabled = false;
+        signupBtnText.classList.remove('hidden');
+        signupSpinner.classList.add('hidden');
       }
     });
   </script>
