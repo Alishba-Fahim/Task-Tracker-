@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - Task Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    .animate-fade-in {
+      animation: fadeIn 0.8s cubic-bezier(.4,0,.2,1);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(40px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+    .glass-bg {
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(8px);
+    }
+    @media (max-width: 640px) {
+      .login-card {
+        padding: 1.5rem !important;
+        border-radius: 1.25rem !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-blue-200 via-purple-100 to-pink-100 min-h-screen font-sans flex items-center justify-center">
+
+  <div class="login-card glass-bg shadow-2xl rounded-3xl p-8 sm:p-10 w-full max-w-md relative animate-fade-in">
+    <!-- Logo/Brand -->
+    <div class="flex flex-col items-center mb-6">
+      <div class="bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-full p-4 mb-2 shadow-lg animate-fade-in" style="animation-delay:0.1s;">
+        <i class="fa-solid fa-list-check text-white text-3xl"></i>
+      </div>
+      <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 drop-shadow">Task Tracker</h2>
+      <p class="text-gray-500 text-sm mt-1">Welcome back! Please login to your account.</p>
+    </div>
+    <!-- Alert -->
+    <div id="login-alert" class="hidden mb-4 px-4 py-2 rounded text-white text-center"></div>
+    <!-- Login Form -->
+    <form id="login-form" class="flex flex-col gap-4 mt-2" autocomplete="off">
+      <div>
+        <label for="login-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-purple-400">
+            <i class="fa-solid fa-envelope"></i>
+          </span>
+          <input type="email" id="login-email" placeholder="Email" required
+            class="pl-10 pr-3 py-2 w-full border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300 transition bg-white/80">
+        </div>
+      </div>
+      <div>
+        <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-purple-400">
+            <i class="fa-solid fa-lock"></i>
+          </span>
+          <input type="password" id="login-password" placeholder="Password" required
+            class="pl-10 pr-10 py-2 w-full border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300 transition bg-white/80">
+          <button type="button" id="toggle-password" tabindex="-1"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-purple-300 hover:text-pink-500 focus:outline-none">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+        </div>
+      </div>
+      <button type="submit" id="login-btn"
+        class="bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-full py-2 font-bold shadow hover:from-pink-600 hover:to-purple-600 transition-all duration-200 flex items-center justify-center gap-2">
+        <span id="login-btn-text">Login</span>
+        <span id="login-spinner" class="hidden">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+        </span>
+      </button>
+    </form>
+    <div class="mt-6 text-center text-gray-500">
+      Don't have an account?
+      <a href="signup.html" class="text-pink-600 hover:underline font-semibold">Sign up here!</a>
+    </div>
+    <footer class="mt-6 text-xs text-gray-400 text-center">
+      &copy; 2024 Task Tracker
+    </footer>
+  </div>
+
+  <script src="firebase-config.js"></script>
+  <script>
+    // Show/hide password
+    const passwordInput = document.getElementById('login-password');
+    const togglePasswordBtn = document.getElementById('toggle-password');
+    togglePasswordBtn.addEventListener('click', () => {
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        togglePasswordBtn.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+      } else {
+        passwordInput.type = 'password';
+        togglePasswordBtn.innerHTML = '<i class="fa-solid fa-eye"></i>';
+      }
+    });
+
+    // Login logic with alert and loading spinner
+    const loginForm = document.getElementById('login-form');
+    const loginAlert = document.getElementById('login-alert');
+    const loginBtn = document.getElementById('login-btn');
+    const loginBtnText = document.getElementById('login-btn-text');
+    const loginSpinner = document.getElementById('login-spinner');
+
+    function showAlert(message, type = 'error') {
+      loginAlert.textContent = message;
+      loginAlert.className = 'mb-4 px-4 py-2 rounded text-white text-center ' +
+        (type === 'success' ? 'bg-green-500' : 'bg-pink-500');
+      loginAlert.classList.remove('hidden');
+      setTimeout(() => {
+        loginAlert.classList.add('hidden');
+      }, 4000);
+    }
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      loginAlert.classList.add('hidden');
+      loginBtn.disabled = true;
+      loginBtnText.classList.add('hidden');
+      loginSpinner.classList.remove('hidden');
+      const email = document.getElementById('login-email').value;
+      const password = passwordInput.value;
+      try {
+        await firebase.auth().signInWithEmailAndPassword(email, password);
+        showAlert('Login successful! Redirecting...', 'success');
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 1200);
+      } catch (error) {
+        showAlert(error.message, 'error');
+      } finally {
+        loginBtn.disabled = false;
+        loginBtnText.classList.remove('hidden');
+        loginSpinner.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+</html>
